@@ -3,10 +3,20 @@
     <div class="menu">
       <p>Dashboard</p>
     </div>
-    <div class="">
+    <div class="nav-right">
       <div class="profile">
         <!-- <div class="profile_heading">Profile</div> -->
-        <Avatar icon="pi pi-user" size="small" v-badge="1" shape="circle" />
+        <Avatar
+          icon="pi pi-user"
+          size="small"
+          v-badge="1"
+          shape="circle"
+          @click="toggle"
+          aria-haspopup="true"
+          aria-controls="overlay_menu"
+        />
+
+        <Menu id="overlay_menu" ref="menu" :model="items" :popup="true" />
         <p class="name">{{ user.email }}</p>
       </div>
       <i data-feather="menu" class="menu-icon"></i>
@@ -21,11 +31,11 @@
           <Button
             @click.prevent="showModal"
             icon="pi pi-plus"
-            class="p-button-rounded"
+            class="p-button-rounded showModalButton"
           />
         </div>
 
-        <div v-for="doc in docs" :key="doc.id" class="next_of_kin_list">
+        <div v-for="doc in slicedDocs" :key="doc.id" class="next_of_kin_list">
           <Avatar
             image="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png"
             class="mr-2"
@@ -48,7 +58,6 @@
               class="p-button-rounded p-button-danger doc-edit p-button-text"
             />
 
-
             <!-- <Button
               @click="deleteUser()"
               icon="pi pi-check"
@@ -57,16 +66,16 @@
           </div>
         </div>
       </div>
-      <div class="link">
-       
-            <Button
-              icon="pi pi-arrow-right"
-              class="p-button-rounded p-button-secondary doc-edit p-button-text"
-            />      <router-link to="/list"> <p>View full list</p></router-link>
+      <div class="link" v-if="slicedDocs.length">
+        <Button
+          icon="pi pi-arrow-right"
+          class="p-button-rounded p-button-secondary doc-edit p-button-text"
+        />
+        <router-link to="/list"> <p>View full list</p></router-link>
       </div>
-      <div class="logout">
+      <!-- <div class="logout">
         <Button label="logout" class="p-button-raised" @click="logout" />
-      </div>
+      </div> -->
       <div></div>
     </div>
     <div class="stats_section">
@@ -118,41 +127,68 @@
 <script>
 import { ref } from "@vue/reactivity";
 import { onMounted } from "vue";
-import { collection, deleteDoc, onSnapshot, addDoc , doc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  onSnapshot,
+  addDoc,
+  doc,
+} from "firebase/firestore";
 import { auth, db } from "../assets/firebase";
 import { useStore } from "vuex";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
-import { useRouter } from "vue-router"
-
+import { useRouter } from "vue-router";
 
 export default {
   setup() {
+    onMounted(() => {
+      feather.replace();
+      chart();
+      onSnapshot(collection(db, "nextOfKins"), (querySnapshot) => {
+        const documents = [];
+        querySnapshot.forEach((doc) => {
+          console.log(doc.id, " => ", doc.data());
+          const pushDocs = {
+            id: doc.id,
+            name: doc.data().name,
+            email: doc.data().email,
+            phoneNumber: doc.data().phoneNumber,
+          };
+
+          documents.push(pushDocs);
+        });
+        docs.value = documents;
+      });
+    });
+
     const store = useStore();
     const user = ref("");
     const confirm = useConfirm();
     const toast = useToast();
     const router = useRouter();
+    const slicedDocs = ref([]);
+
     const nokDelete = (id) => {
-      console.log( "id" , id) 
-      
-       confirm1( id)
-    }
-    const confirm1 = (id ) => {
+      console.log("id", id);
+
+      confirm1(id);
+    };
+    const confirm1 = (id) => {
       confirm.require({
         message: "Do you want to delete this record?",
         header: "Delete Confirmation",
         icon: "pi pi-info-circle",
         acceptClass: "p-button-danger",
         accept: () => {
-         deleteNextOfKin(id),
-          toast.add({
-            severity: "info",
-            summary: "Confirmed",
-            detail: "Record deleted",
-            deleteNextOfKin,
-            life: 3000,
-          });
+          deleteNextOfKin(id),
+            toast.add({
+              severity: "info",
+              summary: "Confirmed",
+              detail: "Record deleted",
+              deleteNextOfKin,
+              life: 3000,
+            });
         },
         reject: () => {
           toast.add({
@@ -175,11 +211,11 @@ export default {
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
           ["Time of Day ", "Heartrate"],
-          ["2", 400],
-          ["3", 460],
-          ["4", 1120],
-          ["5", 540],
-          ["6", 544],
+          ["2", 80],
+          ["3", 81],
+          ["4", 82],
+          ["5", 87],
+          ["6", 91],
           ["7", 545],
           ["8", 546],
           ["0", 999],
@@ -198,7 +234,7 @@ export default {
         chart.draw(data, options);
       }
     };
-    const nexOfKinList = collection(db, "nextOfKins")
+    const nexOfKinList = collection(db, "nextOfKins");
     const docs = ref([]);
     const showModal = () => {
       display.value = true;
@@ -207,9 +243,13 @@ export default {
     const logout = () => {
       store.dispatch("logout");
     };
+    const menu = ref();
     const deleteUserConfirmation = ref(false);
     const deleteNextOfKin = (id) => {
-       deleteDoc(doc(nexOfKinList, id ));
+      deleteDoc(doc(nexOfKinList, id));
+    };
+    const toggle = (event) => {
+      menu.value.toggle(event);
     };
     const newDocName = ref("");
     const newDocEmail = ref("");
@@ -224,7 +264,31 @@ export default {
       newDocEmail.value = "";
       newDocPhone.value = "";
     };
+  const items = ref([
+            {
+                label: 'Profile',
+                items: [{
+                    label: auth.currentUser.email,
+                    icon: 'pi pi-envelope',
+                    command: () => {
+                        toast.add({severity:'success', summary:'Updated', detail:'Data Updated', life: 3000});
+                    }
+                },
 
+                
+            ]},
+            {
+                label: 'Next of Kin List',
+                items: [
+                {
+                    label: 'View List', 
+                    icon: 'pi pi-arrow-right',
+                    command: () => {
+                       router.push('/list')
+                    }
+                }
+            ]}
+        ]);
     onMounted(() => {
       feather.replace();
       chart();
@@ -242,8 +306,10 @@ export default {
           documents.push(pushDocs);
         });
         docs.value = documents;
+        slicedDocs.value = docs.value.slice(0, 3);
       });
     });
+
     return {
       user,
       chart,
@@ -261,7 +327,11 @@ export default {
       newDocEmail,
       newDocPhone,
       nokDelete,
-      router
+      router,
+      slicedDocs,
+      toggle,
+      menu,
+      items
     };
   },
 };
@@ -417,11 +487,14 @@ button {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 14px;
-  align-items: center;
   padding-top: 25px;
   padding-bottom: 25px;
+}
+._heading > P {
+  display: flex;
+  align-items: center;
 }
 .modal-header {
   padding-right: 20px;
@@ -454,6 +527,12 @@ button {
 .doc-edit {
   /* transform: scale(1.2); */
 }
+.nav-right {
+  padding-right: 100px;
+}
+.showModalButton {
+  transform: scale(0.8);
+}
 @media (max-width: 620px) {
   .dashboard {
     margin: 30px;
@@ -484,6 +563,9 @@ button {
   }
   .profile {
     display: none;
+  }
+  .nav-right {
+    padding-right: 0px;
   }
 }
 </style>

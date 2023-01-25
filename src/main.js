@@ -9,18 +9,18 @@ import Button from "primevue/button";
 import Avatar from "primevue/avatar";
 import ConfirmationService from "primevue/confirmationservice";
 import ConfirmDialog from "primevue/confirmdialog";
-import Toast from "primevue/toast"
+import Toast from "primevue/toast";
 import ToastService from "primevue/toastservice";
 import InputText from "primevue/inputtext";
 import Chart from "primevue/chart";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
+import Menu from "primevue/menu";
 
 import "primevue/resources/themes/lara-light-indigo/theme.css";
 import "primevue/resources/primevue.min.css";
-import "primeicons/primeicons.css"
+import "primeicons/primeicons.css";
 import "./assets/styles.scss";
-
 
 createApp(App)
   .use(router)
@@ -28,7 +28,7 @@ createApp(App)
   .use(PrimeVue, { ripple: true })
   .use(ConfirmationService)
   .use(ToastService)
-
+  .component("Menu", Menu)
   .component("Dialog", Dialog)
   .component("InputText", InputText)
   .component("Button", Button)

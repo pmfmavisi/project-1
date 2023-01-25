@@ -179,7 +179,7 @@ export default {
   box-shadow: 0px 1px 2px 0px rgb(60 64 67 / 30%),
     0px 1px 3px 1px rgb(60 64 67 / 15%);
   background-color: #fff;
-  width: 50%;
+  width: 40%;
 }
 nav {
   display: flex;
@@ -197,7 +197,6 @@ nav {
 }
 .datatable {
   padding: 30px;
-
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -205,5 +204,8 @@ nav {
 
 .modal-content > div {
   padding: 10px;
+}
+.doc-edit {
+    transform: scale(1.3);
 }
 </style>
