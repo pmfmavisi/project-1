@@ -48,12 +48,12 @@
           </div>
           <div>
             <Button
-              @click.prevent="showModal"
+              @click.prevent="showEditModal(doc)"
               icon="pi pi-user-edit"
               class="p-button-rounded p-button-success doc-edit p-button-text"
             />
             <Button
-              @click.prevent="nokDelete(doc.id)"
+              @click.prevent="confirm1(doc.id)"
               icon="pi pi-trash"
               class="p-button-rounded p-button-danger doc-edit p-button-text"
             />
@@ -89,7 +89,7 @@
   </div>
   <Dialog v-model:visible="display" :modal="true" :draggable="false">
     <template #header class="modalHeader">
-      <h5>Edit Next of Kin</h5>
+      <h5>Add New Next of Kin</h5>
     </template>
     <div class="modal-content">
       <div>
@@ -121,6 +121,44 @@
       <Button label="save" class="p-button-raised" @click="addNewDocument" />
     </template>
   </Dialog>
+  <Dialog v-model:visible="displayEdit" :modal="true" :draggable="false">
+    <template #header class="modalHeader">
+      <h5>Edit Next of Kin</h5>
+    </template>
+    <div class="modal-content">
+      <div>
+        <InputText
+          type="text"
+          v-model="newDocName"
+          class="p-inputtext-sm"
+          placeholder="Name"
+        />
+      </div>
+      <div>
+        <InputText
+          type="text"
+          v-model="newDocEmail"
+          class="p-inputtext-sm"
+          placeholder="Email"
+        />
+      </div>
+      <div>
+        <InputText
+          type="text"
+          class="p-inputtext-sm"
+          placeholder="PhoneNumber"
+          v-model="newDocPhone"
+        />
+      </div>
+    </div>
+    <template #footer class="modal-footer">
+      <Button
+        label="save"
+        class="p-button-raised"
+        @click="updateNextOfKin(newDocId)"
+      />
+    </template>
+  </Dialog>
   <Toast />
   <ConfirmDialog></ConfirmDialog>
 </template>
@@ -133,6 +171,7 @@ import {
   onSnapshot,
   addDoc,
   doc,
+  updateDoc,
 } from "firebase/firestore";
 import { auth, db } from "../assets/firebase";
 import { useStore } from "vuex";
@@ -168,12 +207,8 @@ export default {
     const toast = useToast();
     const router = useRouter();
     const slicedDocs = ref([]);
+    const newDocId = ref(0);
 
-    const nokDelete = (id) => {
-      console.log("id", id);
-
-      confirm1(id);
-    };
     const confirm1 = (id) => {
       confirm.require({
         message: "Do you want to delete this record?",
@@ -186,7 +221,6 @@ export default {
               severity: "info",
               summary: "Confirmed",
               detail: "Record deleted",
-              deleteNextOfKin,
               life: 3000,
             });
         },
@@ -216,9 +250,9 @@ export default {
           ["4", 82],
           ["5", 87],
           ["6", 91],
-          ["7", 545],
-          ["8", 546],
-          ["0", 999],
+          ["7", 75],
+          ["8", 86],
+          ["0", 92,]
         ]);
 
         var options = {
@@ -237,7 +271,18 @@ export default {
     const nexOfKinList = collection(db, "nextOfKins");
     const docs = ref([]);
     const showModal = () => {
+      newDocName.value = "";
+      newDocEmail.value = "";
+      newDocPhone.value = "";
       display.value = true;
+      console.log("hello");
+    };
+    const showEditModal = (doc) => {
+      newDocId.value = doc.id;
+      newDocName.value = doc.name;
+      newDocEmail.value = doc.email;
+      newDocPhone.value = doc.phoneNumber;
+      displayEdit.value = true;
       console.log("hello");
     };
     const logout = () => {
@@ -248,9 +293,26 @@ export default {
     const deleteNextOfKin = (id) => {
       deleteDoc(doc(nexOfKinList, id));
     };
+    const updateNextOfKin = (id) => {
+      // Set the "capital" field of the city 'DC'
+      updateDoc(doc(db, "nextOfKins", id), {
+        name: newDocName.value,
+        email: newDocEmail.value,
+        phoneNumber: newDocPhone.value,
+      });
+
+      displayEdit.value = false;
+      toast.add({
+        severity: "info",
+        summary: "Confirmed",
+        detail: "Record updated",
+        life: 3000,
+      });
+    };
     const toggle = (event) => {
       menu.value.toggle(event);
     };
+    const displayEdit = ref(false);
     const newDocName = ref("");
     const newDocEmail = ref("");
     const newDocPhone = ref("");
@@ -263,33 +325,44 @@ export default {
       newDocName.value = "";
       newDocEmail.value = "";
       newDocPhone.value = "";
-      display.value = false
+      display.value = false;
     };
-  const items = ref([
-            {
-                label: 'Profile',
-                items: [{
-                    label: auth.currentUser.email,
-                    icon: 'pi pi-envelope',
-                    command: () => {
-                       
-                    }
-                },
-
-                
-            ]},
-            {
-                label: 'Next of Kin List',
-                items: [
-                {
-                    label: 'View List', 
-                    icon: 'pi pi-arrow-right',
-                    command: () => {
-                       router.push('/list')
-                    }
-                }
-            ]}
-        ]);
+    const items = ref([
+      {
+        label: "Profile",
+        items: [
+          {
+            label: auth.currentUser.email,
+            icon: "pi pi-envelope",
+            command: () => {},
+          },
+        ],
+      },
+      {
+        label: "Next of Kin List",
+        items: [
+          {
+            label: "View List",
+            icon: "pi pi-arrow-right",
+            command: () => {
+              router.push("/list");
+            },
+          },
+        ],
+      },
+      {
+        label: "Logout",
+        items: [
+          {
+            label: "Logout",
+            icon: "pi pi-avatar",
+            command: () => {
+              logout();
+            },
+          },
+        ],
+      },
+    ]);
     onMounted(() => {
       feather.replace();
       chart();
@@ -324,15 +397,18 @@ export default {
       confirm,
       confirm1,
       addNewDocument,
+      newDocId,
       newDocName,
       newDocEmail,
       newDocPhone,
-      nokDelete,
       router,
       slicedDocs,
       toggle,
       menu,
-      items
+      items,
+      updateNextOfKin,
+      displayEdit,
+      showEditModal,
     };
   },
 };
@@ -525,16 +601,14 @@ button {
 .logout {
   place-self: center;
 }
-.doc-edit {
-  /* transform: scale(1.2); */
-}
+
 .nav-right {
   padding-right: 100px;
 }
 .showModalButton {
   transform: scale(0.8);
 }
-@media (max-width: 620px) {
+@media (max-width: 1200px) {
   .dashboard {
     margin: 30px;
     display: grid;

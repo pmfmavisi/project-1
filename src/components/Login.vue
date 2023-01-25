@@ -116,9 +116,7 @@ form > p {
     display: block;
      margin-top: 30px;
   }
-  .grid-cols-1{
-   
-  }
+
   .grid-col-2{
     display: none;
   } }

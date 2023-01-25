@@ -22,7 +22,7 @@
       <i data-feather="menu" class="menu-icon"></i>
     </div>
   </nav>
-  <div class="datatable" >
+  <div class="datatable">
     <div v-for="doc in docs" :key="doc.id" class="next_of_kin_list">
       <Avatar
         image="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png"
@@ -36,7 +36,7 @@
       </div>
       <div>
         <Button
-          @click.prevent="showModal"
+          @click.prevent="showEditModal(doc)"
           icon="pi pi-user-edit"
           class="p-button-rounded p-button-success doc-edit p-button-text"
         />
@@ -54,7 +54,17 @@
       </div>
     </div>
   </div>
-  <div style=" display:flex; justify-content:center; font-size:18px; color:#grey " v-if="!docs.length"> List is empty </div>
+  <div
+    style="
+      display: flex;
+      justify-content: center;
+      font-size: 18px;
+      color: #grey;
+    "
+    v-if="!docs.length"
+  >
+    List is empty
+  </div>
   <Dialog v-model:visible="display" :modal="true" :draggable="false">
     <template #header class="modalHeader">
       <h5>Edit Next of Kin</h5>
@@ -89,28 +99,67 @@
       <Button label="save" class="p-button-raised" @click="addNewDocument" />
     </template>
   </Dialog>
+  <Dialog v-model:visible="displayEdit" :modal="true" :draggable="false">
+    <template #header class="modalHeader">
+      <h5>Edit Next of Kin</h5>
+    </template>
+    <div class="modal-content">
+      <div>
+        <InputText
+          type="text"
+          v-model="newDocName"
+          class="p-inputtext-sm"
+          placeholder="Name"
+        />
+      </div>
+      <div>
+        <InputText
+          type="text"
+          v-model="newDocEmail"
+          class="p-inputtext-sm"
+          placeholder="Email"
+        />
+      </div>
+      <div>
+        <InputText
+          type="text"
+          class="p-inputtext-sm"
+          placeholder="PhoneNumber"
+          v-model="newDocPhone"
+        />
+      </div>
+    </div>
+    <template #footer class="modal-footer">
+      <Button
+        label="save"
+        class="p-button-raised"
+        @click="updateNextOfKin(newDocId)"
+      />
+    </template>
+  </Dialog>
   <Toast />
   <ConfirmDialog></ConfirmDialog>
 </template>
 <script>
-import {
-  collection,
-  deleteDoc,
-  onSnapshot,
-  addDoc,
-  doc,
-} from "firebase/firestore";
+import { collection, deleteDoc, onSnapshot, doc , updateDoc } from "firebase/firestore";
 import { auth, db } from "../assets/firebase";
 import { ref } from "@vue/reactivity";
 import { onMounted } from "@vue/runtime-core";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
+import { useStore} from "vuex"
 export default {
   setup() {
+    const store = useStore()
+    const newDocId = ref(0);
+    const newDocName = ref("");
+    const newDocEmail = ref("");
+    const newDocPhone = ref("");
     const nexOfKinList = collection(db, "nextOfKins");
     const user = ref();
     const docs = ref([]);
+    const displayEdit = ref(false);
     const confirm = useConfirm();
     const toast = useToast();
     const router = useRouter();
@@ -158,40 +207,82 @@ export default {
         docs.value = documents;
       });
     });
-      const items = ref([
+    const items = ref([
+      {
+        label: "Profile",
+        items: [
+          {
+            label: auth.currentUser.email,
+            icon: "pi pi-envelope",
+            command: () => {},
+          },
+        ],
+      },
+      {
+        label: "Back to DashCoard ",
+        items: [
+          {
+            label: "Dashboard",
+            icon: "pi pi-arrow-right",
+            command: () => {
+              router.push("/home");
+            },
+          },
+        ],
+      },
             {
-                label: 'Profile',
-                items: [{
-                    label: auth.currentUser.email,
-                    icon: 'pi pi-envelope',
-                    command: () => {
-                       
-                    }
-                },
+        label: "Logout ",
+        items: [
+          {
+            label: "logout",
+            icon: "pi pi-avatar",
+            command: () => {
+              logout()
+            },
+          },
+        ],
+      },
+    ]);
+        const updateNextOfKin = (id) => {
+      // Set the "capital" field of the city 'DC'
+      updateDoc(doc(db, "nextOfKins", id), {
+        name: newDocName.value,
+        email: newDocEmail.value,
+        phoneNumber: newDocPhone.value,
+      });
 
-                
-            ]},
-            {
-                label: 'Next of Kin List',
-                items: [
-                {
-                    label: 'Dashboard', 
-                    icon: 'pi pi-arrow-right',
-                    command: () => {
-                       router.push('/home')
-                    }
-                }
-            ]}
-        ]);
-        const menu = ref();
-        const toggle = (event) => {
+      displayEdit.value = false;
+      toast.add({
+        severity: "info",
+        summary: "Confirmed",
+        detail: "Record updated",
+        life: 3000,
+      });
+    };
+        const logout = () => {
+      store.dispatch("logout");
+    };
+    const menu = ref();
+    const toggle = (event) => {
       menu.value.toggle(event);
     };
     const display = ref(false);
     const showModal = () => {
+      newDocName.value = "";
+      newDocEmail.value = "";
+      newDocPhone.value = "";
       display.value = true;
       console.log("hello");
     };
+    const showEditModal = (doc) => {
+        newDocId.value = doc.id;
+      newDocName.value = doc.name;
+      newDocEmail.value = doc.email;
+      newDocPhone.value = doc.phoneNumber;
+      displayEdit.value = true;
+      console.log("hello");
+    };
+
     const deleteNextOfKin = (id) => {
       deleteDoc(doc(nexOfKinList, id));
     };
@@ -204,8 +295,16 @@ export default {
       display,
       deleteNextOfKin,
       items,
-       menu , 
-      toggle
+      menu,
+      toggle,
+      showEditModal,
+      displayEdit,
+      newDocId,
+      newDocName,
+      newDocEmail,
+      newDocPhone,
+      updateNextOfKin,
+      logout
     };
   },
 };
@@ -245,6 +344,7 @@ nav {
   display: flex;
   justify-content: center;
   flex-direction: column;
+  
 }
 
 .modal-content > div {
@@ -253,10 +353,12 @@ nav {
 .doc-edit {
   transform: scale(1.3);
 }
-    .nav-right {
+.nav-right {
   padding-right: 100px;
 }
- @media(max-width : 800px){
-
- }
+@media (max-width: 800px) {
+    nav {
+        display: lfe;
+    }
+}
 </style>
