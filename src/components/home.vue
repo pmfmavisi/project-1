@@ -263,6 +263,7 @@ export default {
       newDocName.value = "";
       newDocEmail.value = "";
       newDocPhone.value = "";
+      display.value = false
     };
   const items = ref([
             {

@@ -3,16 +3,26 @@
     <div class="menu">
       <p>Dashboard</p>
     </div>
-    <div class="">
+    <div class="nav-right">
       <div class="profile">
         <!-- <div class="profile_heading">Profile</div> -->
-        <Avatar icon="pi pi-user" size="small" shape="circle" />
+        <Avatar
+          icon="pi pi-user"
+          size="small"
+          v-badge="1"
+          shape="circle"
+          @click="toggle"
+          aria-haspopup="true"
+          aria-controls="overlay_menu"
+        />
+
+        <Menu id="overlay_menu" ref="menu" :model="items" :popup="true" />
         <p class="name">{{ user.email }}</p>
       </div>
       <i data-feather="menu" class="menu-icon"></i>
     </div>
   </nav>
-  <div class="datatable">
+  <div class="datatable" >
     <div v-for="doc in docs" :key="doc.id" class="next_of_kin_list">
       <Avatar
         image="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png"
@@ -44,6 +54,7 @@
       </div>
     </div>
   </div>
+  <div style=" display:flex; justify-content:center; font-size:18px; color:#grey " v-if="!docs.length"> List is empty </div>
   <Dialog v-model:visible="display" :modal="true" :draggable="false">
     <template #header class="modalHeader">
       <h5>Edit Next of Kin</h5>
@@ -94,6 +105,7 @@ import { ref } from "@vue/reactivity";
 import { onMounted } from "@vue/runtime-core";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
+import { useRouter } from "vue-router";
 export default {
   setup() {
     const nexOfKinList = collection(db, "nextOfKins");
@@ -101,6 +113,7 @@ export default {
     const docs = ref([]);
     const confirm = useConfirm();
     const toast = useToast();
+    const router = useRouter();
     const confirm1 = (id) => {
       confirm.require({
         message: "Do you want to delete this record?",
@@ -162,15 +175,18 @@ export default {
                 label: 'Next of Kin List',
                 items: [
                 {
-                    label: 'View List', 
+                    label: 'Dashboard', 
                     icon: 'pi pi-arrow-right',
                     command: () => {
-                       router.push('/list')
+                       router.push('/home')
                     }
                 }
             ]}
         ]);
-
+        const menu = ref();
+        const toggle = (event) => {
+      menu.value.toggle(event);
+    };
     const display = ref(false);
     const showModal = () => {
       display.value = true;
@@ -187,7 +203,9 @@ export default {
       showModal,
       display,
       deleteNextOfKin,
-      items
+      items,
+       menu , 
+      toggle
     };
   },
 };
@@ -235,4 +253,10 @@ nav {
 .doc-edit {
   transform: scale(1.3);
 }
+    .nav-right {
+  padding-right: 100px;
+}
+ @media(max-width : 800px){
+
+ }
 </style>

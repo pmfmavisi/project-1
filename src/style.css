@@ -1,5 +1,7 @@
 *{
   margin: 0px;
+    font-family: "Inter", "Helvetica Neue", "Segoe UI", "Fira Sans", Roboto,
+    Oxygen, Ubuntu, "Droid Sans", "Arial", sans-serif;
 }
 html {
     background-color: rgb(231, 226, 226);
