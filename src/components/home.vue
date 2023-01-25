@@ -271,7 +271,7 @@ export default {
                     label: auth.currentUser.email,
                     icon: 'pi pi-envelope',
                     command: () => {
-                        toast.add({severity:'success', summary:'Updated', detail:'Data Updated', life: 3000});
+                       
                     }
                 },
 
@@ -537,7 +537,7 @@ button {
   .dashboard {
     margin: 30px;
     display: grid;
-    width: 90%;
+    max-width: 90%;
     grid-template-columns: 1fr;
   }
   .profile_section {
@@ -554,9 +554,9 @@ button {
   .menu-icon {
     display: block;
   }
-  nav > div {
+  /* nav > div {
     padding-left: 30px;
-  }
+  } */
   .menu {
     display: flex;
     gap: 20px;

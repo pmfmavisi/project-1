@@ -96,10 +96,10 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 export default {
   setup() {
-    const nexOfKinList = ref("");
+    const nexOfKinList = collection(db, "nextOfKins");
     const user = ref();
     const docs = ref([]);
-        const confirm = useConfirm();
+    const confirm = useConfirm();
     const toast = useToast();
     const confirm1 = (id) => {
       confirm.require({
@@ -145,13 +145,39 @@ export default {
         docs.value = documents;
       });
     });
+      const items = ref([
+            {
+                label: 'Profile',
+                items: [{
+                    label: auth.currentUser.email,
+                    icon: 'pi pi-envelope',
+                    command: () => {
+                       
+                    }
+                },
+
+                
+            ]},
+            {
+                label: 'Next of Kin List',
+                items: [
+                {
+                    label: 'View List', 
+                    icon: 'pi pi-arrow-right',
+                    command: () => {
+                       router.push('/list')
+                    }
+                }
+            ]}
+        ]);
+
     const display = ref(false);
     const showModal = () => {
       display.value = true;
       console.log("hello");
     };
-        const deleteNextOfKin = (id) => {
-       deleteDoc(doc(nexOfKinList, id ));
+    const deleteNextOfKin = (id) => {
+      deleteDoc(doc(nexOfKinList, id));
     };
     return {
       nexOfKinList,
@@ -161,6 +187,7 @@ export default {
       showModal,
       display,
       deleteNextOfKin,
+      items
     };
   },
 };
@@ -206,6 +233,6 @@ nav {
   padding: 10px;
 }
 .doc-edit {
-    transform: scale(1.3);
+  transform: scale(1.3);
 }
 </style>

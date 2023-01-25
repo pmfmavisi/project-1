@@ -20,7 +20,7 @@ import Menu from "primevue/menu";
 import "primevue/resources/themes/lara-light-indigo/theme.css";
 import "primevue/resources/primevue.min.css";
 import "primeicons/primeicons.css";
-import "./assets/styles.scss";
+// import "./assets/styles.scss";
 
 createApp(App)
   .use(router)
