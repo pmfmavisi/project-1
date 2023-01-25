@@ -16,10 +16,18 @@
           aria-controls="overlay_menu"
         />
 
-        <Menu id="overlay_menu" ref="menu" :model="items" :popup="true" />
         <p class="name">{{ user.email }}</p>
       </div>
-      <i data-feather="menu" class="menu-icon"></i>
+      <div     @click="toggle"
+        aria-haspopup="true"
+        aria-controls="overlay_menu">
+      <i
+    
+        data-feather="menu"
+        class="menu-icon"
+      ></i>
+      </div>
+        <Menu id="overlay_menu" ref="menu" :model="items" :popup="true" />
     </div>
   </nav>
   <div class="datatable">
@@ -46,11 +54,6 @@
           class="p-button-rounded p-button-danger doc-edit p-button-text"
         />
 
-        <!-- <Button
-              @click="deleteUser()"
-              icon="pi pi-check"
-              label="Confirm"
-            ></Button> -->
       </div>
     </div>
   </div>
@@ -141,17 +144,23 @@
   <ConfirmDialog></ConfirmDialog>
 </template>
 <script>
-import { collection, deleteDoc, onSnapshot, doc , updateDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { auth, db } from "../assets/firebase";
 import { ref } from "@vue/reactivity";
 import { onMounted } from "@vue/runtime-core";
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
-import { useStore} from "vuex"
+import { useStore } from "vuex";
 export default {
   setup() {
-    const store = useStore()
+    const store = useStore();
     const newDocId = ref(0);
     const newDocName = ref("");
     const newDocEmail = ref("");
@@ -191,6 +200,7 @@ export default {
     };
     user.value = auth.currentUser;
     onMounted(() => {
+      feather.replace()
       onSnapshot(collection(db, "nextOfKins"), (querySnapshot) => {
         const documents = [];
         querySnapshot.forEach((doc) => {
@@ -230,20 +240,20 @@ export default {
           },
         ],
       },
-            {
+      {
         label: "Logout ",
         items: [
           {
             label: "logout",
             icon: "pi pi-avatar",
             command: () => {
-              logout()
+              logout();
             },
           },
         ],
       },
     ]);
-        const updateNextOfKin = (id) => {
+    const updateNextOfKin = (id) => {
       // Set the "capital" field of the city 'DC'
       updateDoc(doc(db, "nextOfKins", id), {
         name: newDocName.value,
@@ -259,7 +269,7 @@ export default {
         life: 3000,
       });
     };
-        const logout = () => {
+    const logout = () => {
       store.dispatch("logout");
     };
     const menu = ref();
@@ -275,7 +285,7 @@ export default {
       console.log("hello");
     };
     const showEditModal = (doc) => {
-        newDocId.value = doc.id;
+      newDocId.value = doc.id;
       newDocName.value = doc.name;
       newDocEmail.value = doc.email;
       newDocPhone.value = doc.phoneNumber;
@@ -304,7 +314,7 @@ export default {
       newDocEmail,
       newDocPhone,
       updateNextOfKin,
-      logout
+      logout,
     };
   },
 };
@@ -344,7 +354,6 @@ nav {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  
 }
 
 .modal-content > div {
@@ -356,9 +365,54 @@ nav {
 .nav-right {
   padding-right: 100px;
 }
+.menu-icon {
+  display: none;
+}
 @media (max-width: 800px) {
-    nav {
-        display: lfe;
-    }
+  nav {
+    display: flex;
+    justify-content: space-between;
+  }
+    .profile {
+    display: none;
+  }
+  .next_of_kin_list {
+    display: block !important;
+  }
+  .nav-right {
+  padding-right: 0px;
+}
+  .next_of_kin_email {
+    font-size: 13px;
+    color: gray;
+  }
+}
+@media (max-width: 480px) {
+  nav {
+    display: flex;
+    justify-content: space-between;
+  }
+    .nav-right {
+  padding-right: 0px;
+}
+  .datatable {
+
+    display: block !important;
+    
+  }
+  .profile {
+    display: none;
+  }
+    .menu-icon {
+    display: block;
+  }
+  .next_of_kin_list {
+    display: block !important;
+    width: 80% !important;
+  }
+  .next_of_kin_email {
+    font-size: 13px;
+    color: gray;
+  }
 }
 </style>

@@ -16,10 +16,18 @@
           aria-controls="overlay_menu"
         />
 
-        <Menu id="overlay_menu" ref="menu" :model="items" :popup="true" />
         <p class="name">{{ user.email }}</p>
       </div>
-      <i data-feather="menu" class="menu-icon"></i>
+      <div     @click="toggle"
+        aria-haspopup="true"
+        aria-controls="overlay_menu">
+      <i
+    
+        data-feather="menu"
+        class="menu-icon"
+      ></i>
+      </div>
+        <Menu id="overlay_menu" ref="menu" :model="items" :popup="true" />
     </div>
   </nav>
 
@@ -252,7 +260,7 @@ export default {
           ["6", 91],
           ["7", 75],
           ["8", 86],
-          ["0", 92,]
+          ["0", 92],
         ]);
 
         var options = {
@@ -505,6 +513,10 @@ button {
   background-size: 60px;
   background-repeat: no-repeat;
   border: 1px solid;
+}
+.link {
+  position: absolute;
+  bottom: 20px;
 }
 .kin_avatar {
   width: 40px;
