@@ -6,28 +6,24 @@
     <div class="nav-right">
       <div class="profile">
         <!-- <div class="profile_heading">Profile</div> -->
-        <Avatar
-          icon="pi pi-user"
-          size="small"
-          v-badge="1"
-          shape="circle"
-          @click="toggle"
-          aria-haspopup="true"
-          aria-controls="overlay_menu"
-        />
-
-        <p class="name">{{ user.email }}</p>
+        <div style="display: flex; align-items: center" @click="toggle">
+          <Avatar
+            icon="pi pi-user"
+            size="small"
+            v-badge="1"
+            shape="circle"
+            @click="toggle"
+            aria-haspopup="true"
+            aria-controls="overlay_menu"
+          />
+          <i data-feather="chevron-down" class="chevron"></i>
+        </div>
+        <p class="name">{{ user }}</p>
       </div>
-      <div     @click="toggle"
-        aria-haspopup="true"
-        aria-controls="overlay_menu">
-      <i
-    
-        data-feather="menu"
-        class="menu-icon"
-      ></i>
+      <div @click="toggle" aria-haspopup="true" aria-controls="overlay_menu">
+        <i data-feather="menu" class="menu-icon"></i>
       </div>
-        <Menu id="overlay_menu" ref="menu" :model="items" :popup="true" />
+      <Menu id="overlay_menu" ref="menu" :model="items" :popup="true" />
     </div>
   </nav>
 
@@ -172,16 +168,17 @@
 </template>
 <script>
 import { ref } from "@vue/reactivity";
-import { onMounted , onUpdated} from "vue";
+import { onBeforeMount, onMounted, onUpdated } from "vue";
 import {
   collection,
   deleteDoc,
   onSnapshot,
   addDoc,
+  getDocs,
   doc,
   query,
   updateDoc,
-  where
+  where,
 } from "firebase/firestore";
 import { auth, db } from "../assets/firebase";
 import { useStore } from "vuex";
@@ -191,11 +188,31 @@ import { useRouter } from "vue-router";
 
 export default {
   setup() {
-    onMounted(() => {
+    onBeforeMount(() => {});
+    onMounted(async () => {
       feather.replace();
+      console.log(user.value);
       chart();
-      const q = query(collection(db, "nextOfKins" ), where("user", "==", auth.currentUser.email));
-      onSnapshot(q , (querySnapshot) => {
+      const q = query(
+        collection(db, "nextOfKins"),
+        where("user", "==", auth.currentUser.email)
+      );
+      const querySnapshot = await getDocs(collection(db, "users"));
+      querySnapshot.forEach((doc) => {
+        const docs = {
+          name: doc.data().name,
+          email: doc.data().email,
+        };
+        console.log(docs, " docs");
+
+        users.value.push(docs);
+        console.log(users.value, " users");
+      });
+      user.value = users.value.filter(
+        (user) => user.email == auth.currentUser.email
+      )[0].name;
+      
+      onSnapshot(q, (querySnapshot) => {
         const documents = [];
         querySnapshot.forEach((doc) => {
           console.log(doc.id, " => ", doc.data());
@@ -215,6 +232,8 @@ export default {
 
     const store = useStore();
     const user = ref("");
+    const users = ref([]);
+
     const confirm = useConfirm();
     const toast = useToast();
     const router = useRouter();
@@ -249,7 +268,6 @@ export default {
 
     const display = ref(false);
     const netOfKin = {};
-    user.value = auth.currentUser;
     const chart = () => {
       google.charts.load("current", { packages: ["corechart"] });
       google.charts.setOnLoadCallback(drawChart);
@@ -298,8 +316,8 @@ export default {
       console.log("hello");
     };
     const logout = () => {
-      docs.value = ''
-      slicedDocs.value = ''
+      docs.value = "";
+      slicedDocs.value = "";
       store.dispatch("logout");
     };
     const menu = ref();
@@ -335,7 +353,7 @@ export default {
         name: newDocName.value,
         email: newDocEmail.value,
         phoneNumber: newDocPhone.value,
-        user: auth.currentUser.email
+        user: auth.currentUser.email,
       });
       newDocName.value = "";
       newDocEmail.value = "";
@@ -404,6 +422,7 @@ export default {
       updateNextOfKin,
       displayEdit,
       showEditModal,
+      users,
     };
   },
 };
@@ -519,7 +538,9 @@ button {
   margin-top: 5px;
   font-size: 12px;
 }
-
+.chevron {
+  transform: scale(0.8);
+}
 .modal-content > div {
   padding: 10px;
 }
@@ -571,6 +592,9 @@ button {
 ._heading > P {
   display: flex;
   align-items: center;
+}
+.name {
+  font-size: 15px;
 }
 .modal-header {
   padding-right: 20px;

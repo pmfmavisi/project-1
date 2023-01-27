@@ -6,7 +6,8 @@
     <div class="nav-right">
       <div class="profile">
         <!-- <div class="profile_heading">Profile</div> -->
-        <Avatar
+        <div style="display:flex; align-items:center" @click="toggle">
+                  <Avatar
           icon="pi pi-user"
           size="small"
           v-badge="1"
@@ -15,6 +16,8 @@
           aria-haspopup="true"
           aria-controls="overlay_menu"
         />
+        <i data-feather="chevron-down" class="chevron"></i>
+        </div>
 
         <p class="name">{{ user.email }}</p>
       </div>
@@ -338,6 +341,10 @@ export default {
   background-color: #fff;
   width: 40%;
 }
+.chevron   {
+
+  transform: scale(0.8);
+}
 nav {
   display: flex;
   justify-content: space-between;
@@ -366,6 +373,7 @@ nav {
   transform: scale(1.3);
 }
 .nav-right {
+
   padding-right: 100px;
 }
 .menu-icon {
