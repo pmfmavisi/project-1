@@ -211,7 +211,7 @@ export default {
       user.value = users.value.filter(
         (user) => user.email == auth.currentUser.email
       )[0].name;
-      
+
       onSnapshot(q, (querySnapshot) => {
         const documents = [];
         querySnapshot.forEach((doc) => {
@@ -359,6 +359,12 @@ export default {
       newDocEmail.value = "";
       newDocPhone.value = "";
       display.value = false;
+      toast.add({
+        severity: "info",
+        summary: "Confirmed",
+        detail: "New Record Added",
+        life: 3000,
+      });
     };
     const items = ref([
       {
@@ -379,6 +385,18 @@ export default {
             icon: "pi pi-arrow-right",
             command: () => {
               router.push("/list");
+            },
+          },
+        ],
+      },
+      {
+        label: "Add Next of Kin ",
+        items: [
+          {
+            label: "Add New",
+            icon: "pi pi-user",
+            command: () => {
+              showModal();
             },
           },
         ],
