@@ -172,14 +172,16 @@
 </template>
 <script>
 import { ref } from "@vue/reactivity";
-import { onMounted } from "vue";
+import { onMounted , onUpdated} from "vue";
 import {
   collection,
   deleteDoc,
   onSnapshot,
   addDoc,
   doc,
+  query,
   updateDoc,
+  where
 } from "firebase/firestore";
 import { auth, db } from "../assets/firebase";
 import { useStore } from "vuex";
@@ -192,7 +194,8 @@ export default {
     onMounted(() => {
       feather.replace();
       chart();
-      onSnapshot(collection(db, "nextOfKins"), (querySnapshot) => {
+      const q = query(collection(db, "nextOfKins" ), where("user", "==", auth.currentUser.email));
+      onSnapshot(q , (querySnapshot) => {
         const documents = [];
         querySnapshot.forEach((doc) => {
           console.log(doc.id, " => ", doc.data());
@@ -206,6 +209,7 @@ export default {
           documents.push(pushDocs);
         });
         docs.value = documents;
+        slicedDocs.value = docs.value.slice(0, 3);
       });
     });
 
@@ -294,6 +298,8 @@ export default {
       console.log("hello");
     };
     const logout = () => {
+      docs.value = ''
+      slicedDocs.value = ''
       store.dispatch("logout");
     };
     const menu = ref();
@@ -329,6 +335,7 @@ export default {
         name: newDocName.value,
         email: newDocEmail.value,
         phoneNumber: newDocPhone.value,
+        user: auth.currentUser.email
       });
       newDocName.value = "";
       newDocEmail.value = "";
@@ -371,26 +378,6 @@ export default {
         ],
       },
     ]);
-    onMounted(() => {
-      feather.replace();
-      chart();
-      onSnapshot(collection(db, "nextOfKins"), (querySnapshot) => {
-        const documents = [];
-        querySnapshot.forEach((doc) => {
-          console.log(doc.id, " => ", doc.data());
-          const pushDocs = {
-            id: doc.id,
-            name: doc.data().name,
-            email: doc.data().email,
-            phoneNumber: doc.data().phoneNumber,
-          };
-
-          documents.push(pushDocs);
-        });
-        docs.value = documents;
-        slicedDocs.value = docs.value.slice(0, 3);
-      });
-    });
 
     return {
       user,

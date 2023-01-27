@@ -149,7 +149,9 @@ import {
   deleteDoc,
   onSnapshot,
   doc,
+  query,
   updateDoc,
+  where
 } from "firebase/firestore";
 import { auth, db } from "../assets/firebase";
 import { ref } from "@vue/reactivity";
@@ -201,7 +203,8 @@ export default {
     user.value = auth.currentUser;
     onMounted(() => {
       feather.replace()
-      onSnapshot(collection(db, "nextOfKins"), (querySnapshot) => {
+      const q = query(collection(db, "nextOfKins" ), where("user", "==", auth.currentUser.email));
+      onSnapshot(q , (querySnapshot) => {
         const documents = [];
         querySnapshot.forEach((doc) => {
           console.log(doc.id, " => ", doc.data());
@@ -216,7 +219,7 @@ export default {
         });
         docs.value = documents;
       });
-    });
+     });
     const items = ref([
       {
         label: "Profile",

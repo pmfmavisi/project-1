@@ -4,7 +4,11 @@ import { createStore } from "vuex";
 import router from "../router"
 import { auth } from '../assets/firebase'
 export default createStore({
-  plugins:[createPersistedState()], 
+  plugins: [
+    createPersistedState({
+      storage: window.sessionStorage,
+    }),
+  ],
   state: {
     user: null,
   },
@@ -14,14 +18,14 @@ export default createStore({
     },
     CLEAR_USER(state) {
       state.user = null;
-    },  
+    },
   },
   actions: {
     async login({ commit }, details) {
       const { email, password } = details;
       try {
         await signInWithEmailAndPassword(auth, email, password);
-      } catch (error) {     
+      } catch (error) {
         switch (error.code) {
           case "auth/user-not-found":
             alert("User Not Found");
@@ -34,52 +38,52 @@ export default createStore({
         }
         return;
       }
-      commit('SET_USER',auth.currentUser)
-      router.push('/home')
+      commit("SET_USER", auth.currentUser);
+      router.push("/home");
     },
     async register({ commit }, details) {
-             const { email, password } = details;
-             try {
-               await createUserWithEmailAndPassword(auth, email, password);
-             } catch (error) {
-               switch (error.code) {
-                 case "auth/email-already-in-use ":
-                   alert("Email already in use");
-                   break;
-                 case "auth/invalid-email":
-                   alert("Invalid Email");
-                   break;
-                 case "auth/operation-not-allowed":
-                   alert("Operation not Allowed");
-                   break;
-                 case "auth/weak-password":
-                   alert("Weak Password");
-                   break;
-                 default:
-                   alert("something went wrong");
-                   console.log(error)
-               }
-               return;
-             }
-             commit("SET_USER", auth.currentUser);
-             router.push('/home');
+      const { email, password } = details;
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        switch (error.code) {
+          case "auth/email-already-in-use ":
+            alert("Email already in use");
+            break;
+          case "auth/invalid-email":
+            alert("Invalid Email");
+            break;
+          case "auth/operation-not-allowed":
+            alert("Operation not Allowed");
+            break;
+          case "auth/weak-password":
+            alert("Weak Password");
+            break;
+          default:
+            alert("something went wrong");
+            console.log(error);
+        }
+        return;
+      }
+      commit("SET_USER", auth.currentUser);
+      router.push("/home");
     },
     async logout({ commit }) {
-        await signOut(auth)
-        commit('CLEAR_USER')
-        router.push('/login')
+      await signOut(auth);
+      commit("CLEAR_USER");
+      router.push("/login");
     },
-    fetchUser({ commit}){
-      auth.onAuthStateChanged(async user => {
-        if (user ===null){
-          commit('CLEAR_USER')
-        }else {
-          commit('SET_USER',  user )
-          if (router.isReady && router.currentRoute.value.path === '/login'){
-            router.push('/home')
+    fetchUser({ commit }) {
+      auth.onAuthStateChanged(async (user) => {
+        if (user === null) {
+          commit("CLEAR_USER");
+        } else {
+          commit("SET_USER", user);
+          if (router.isReady && router.currentRoute.value.path === "/login") {
+            router.push("/home");
           }
         }
-      })
-    }
+      });
+    },
   },
 });
