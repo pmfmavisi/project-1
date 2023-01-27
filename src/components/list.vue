@@ -6,31 +6,25 @@
     <div class="nav-right">
       <div class="profile">
         <!-- <div class="profile_heading">Profile</div> -->
-        <div style="display:flex; align-items:center" @click="toggle">
-                  <Avatar
-          icon="pi pi-user"
-          size="small"
-          v-badge="1"
-          shape="circle"
-          @click="toggle"
-          aria-haspopup="true"
-          aria-controls="overlay_menu"
-        />
-        <i data-feather="chevron-down" class="chevron"></i>
+        <div style="display: flex; align-items: center" @click="toggle">
+          <Avatar
+            icon="pi pi-user"
+            size="small"
+            v-badge="1"
+            shape="circle"
+            @click="toggle"
+            aria-haspopup="true"
+            aria-controls="overlay_menu"
+          />
+          <i data-feather="chevron-down" class="chevron"></i>
         </div>
 
         <p class="name">{{ user.email }}</p>
       </div>
-      <div     @click="toggle"
-        aria-haspopup="true"
-        aria-controls="overlay_menu">
-      <i
-    
-        data-feather="menu"
-        class="menu-icon"
-      ></i>
+      <div @click="toggle" aria-haspopup="true" aria-controls="overlay_menu">
+        <i data-feather="menu" class="menu-icon"></i>
       </div>
-        <Menu id="overlay_menu" ref="menu" :model="items" :popup="true" />
+      <Menu id="overlay_menu" ref="menu" :model="items" :popup="true" />
     </div>
   </nav>
   <div class="datatable">
@@ -56,7 +50,6 @@
           icon="pi pi-trash"
           class="p-button-rounded p-button-danger doc-edit p-button-text"
         />
-
       </div>
     </div>
   </div>
@@ -154,7 +147,7 @@ import {
   doc,
   query,
   updateDoc,
-  where
+  where,
 } from "firebase/firestore";
 import { auth, db } from "../assets/firebase";
 import { ref } from "@vue/reactivity";
@@ -205,9 +198,12 @@ export default {
     };
     user.value = auth.currentUser;
     onMounted(() => {
-      feather.replace()
-      const q = query(collection(db, "nextOfKins" ), where("user", "==", auth.currentUser.email));
-      onSnapshot(q , (querySnapshot) => {
+      feather.replace();
+      const q = query(
+        collection(db, "nextOfKins"),
+        where("user", "==", auth.currentUser.email)
+      );
+      onSnapshot(q, (querySnapshot) => {
         const documents = [];
         querySnapshot.forEach((doc) => {
           console.log(doc.id, " => ", doc.data());
@@ -222,7 +218,7 @@ export default {
         });
         docs.value = documents;
       });
-     });
+    });
     const items = ref([
       {
         label: "Profile",
@@ -341,8 +337,7 @@ export default {
   background-color: #fff;
   width: 40%;
 }
-.chevron   {
-
+.chevron {
   transform: scale(0.8);
 }
 nav {
@@ -373,7 +368,6 @@ nav {
   transform: scale(1.3);
 }
 .nav-right {
-
   padding-right: 100px;
 }
 .menu-icon {
@@ -384,15 +378,15 @@ nav {
     display: flex;
     justify-content: space-between;
   }
-    .profile {
+  .profile {
     display: none;
   }
   .next_of_kin_list {
     display: block !important;
   }
   .nav-right {
-  padding-right: 0px;
-}
+    padding-right: 0px;
+  }
   .next_of_kin_email {
     font-size: 13px;
     color: gray;
@@ -403,18 +397,16 @@ nav {
     display: flex;
     justify-content: space-between;
   }
-    .nav-right {
-  padding-right: 0px;
-}
+  .nav-right {
+    padding-right: 0px;
+  }
   .datatable {
-
     display: block !important;
-    
   }
   .profile {
     display: none;
   }
-    .menu-icon {
+  .menu-icon {
     display: block;
   }
   .next_of_kin_list {
