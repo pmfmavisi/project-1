@@ -7,12 +7,7 @@ import { getAuth } from "firebase/auth"
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDmj9ZYzV_tVr8bisOES0AteiDNRBEYhmQ",
-  authDomain: "imaginecupauth.firebaseapp.com",
-  projectId: "imaginecupauth",
-  storageBucket: "imaginecupauth.appspot.com",
-  messagingSenderId: "868522317673",
-  appId: "1:868522317673:web:9d80671509368d3a6d8ff8",
+
 };
 
 // Initialize Firebase
